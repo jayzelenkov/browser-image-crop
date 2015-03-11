@@ -1,0 +1,16 @@
+{
+  "name": "browser-image-crop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jev Zelenkov",
+  "license": "MIT",
+  "devDependencies": {
+    "hammerjs": "2.0.4",
+    "jquery": "2.1.3",
+    "jquery-hammerjs": "2.0.0"
+  }
+}

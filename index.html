@@ -1,0 +1,116 @@
+<html>
+  <head>
+    <title>jq touch events</title>
+    <style media="screen">
+      #preview {
+        position: relative;
+      }
+      #overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0.5;
+        background-color: #ccc;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width,maximum-scale=1,minimum-scale=1,user-scalable=no,initial-scale=1">
+  </head>
+  <body>
+    <form id="upload" action="destination.html">
+      <input type="file" id="inputFile" name="inputFile" />
+      <input type="button" id="uploadBtn" value="Submit!">
+    </form>
+
+    <div id="preview">
+      <img id="img" width="460" height="300"/>
+      <div id="overlay"></div>
+    </div>
+
+    <script src="node_modules/jquery/dist/jquery.js"></script>
+    <script src="node_modules/hammerjs/hammer.js"></script>
+    <script charset="utf-8">
+$(function() {
+
+var screen = document.querySelector("#preview");
+var el = document.querySelector("#overlay");
+
+var START_X = 0;
+var START_Y = 0;
+
+var transform = {
+    translate: { x: START_X, y: START_Y },
+    scale: 1,
+    angle: 0,
+    rx: 0,
+    ry: 0,
+    rz: 0
+};
+var reqAnimationFrame = (function () {
+  return window[Hammer.prefixed(window, 'requestAnimationFrame')] || function (callback) {
+    window.setTimeout(callback, 1000 / 60);
+  };
+})();
+
+var ticking = false;
+
+  $("#uploadBtn").click(function (e) {
+    e.preventDefault();
+    var input = document.getElementById("inputFile");
+    var file = input.files[0];
+
+    fr = new FileReader();
+    fr.onload = renderImage;
+    fr.readAsDataURL(file);
+  });
+
+  var mc = new Hammer(el);
+  mc.on("pan", onPan);
+  mc.on("panend", function () {
+    START_X = $(el).offset().left;
+  });
+
+  function requestElementUpdate() {
+        if(!ticking) {
+            reqAnimationFrame(updateElementTransform);
+            ticking = true;
+        }
+  }
+
+  function onPan(ev) {
+    var upperLimit = Math.min(START_X + ev.deltaX, 460 - 300);
+    var lowerLimit = 0;
+    var newX = Math.max(0, upperLimit);
+
+    transform.translate = {
+        x: newX,
+        y: 0
+    };
+    requestElementUpdate();
+  }
+
+  function updateElementTransform() {
+      var value = [
+          'translate3d(' + transform.translate.x + 'px, ' + transform.translate.y + 'px, 0)'
+          // 'scale(' + transform.scale + ', ' + transform.scale + ')',
+          // 'rotate3d('+ transform.rx +','+ transform.ry +','+ transform.rz +','+  transform.angle + 'deg)'
+      ];
+
+      value = value.join(" ");
+      el.style.webkitTransform = value;
+      el.style.mozTransform = value;
+      el.style.transform = value;
+      ticking = false;
+  }
+
+  function renderImage() {
+    var $img = $("#img");
+    var side;
+    $img.attr("src", this.result);
+    side = Math.min($img.width(), $img.height());
+    $(el).width(side).height(side);
+  }
+
+});
+    </script>
+  </body>
+</html>
