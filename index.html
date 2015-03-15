@@ -19,12 +19,14 @@
     <form id="upload" action="destination.html">
       <input type="file" id="inputFile" name="inputFile" />
       <input type="button" id="uploadBtn" value="Submit!">
+      <input type="button" id="crop" value="Crop It!">
     </form>
 
     <div id="preview">
-      <img id="img" width="460" height="300"/>
+      <img id="img" width="480" height="300"/>
       <div id="overlay"></div>
     </div>
+    <canvas id="cropped" width="300" height="300"></canvas>
 
     <script src="node_modules/jquery/dist/jquery.js"></script>
     <script src="node_modules/hammerjs/hammer.js"></script>
@@ -63,6 +65,8 @@ var ticking = false;
     fr.readAsDataURL(file);
   });
 
+  $("#crop").click(crop);
+
   var mc = new Hammer(el);
   mc.on("pan", onPan);
   mc.on("panend", function () {
@@ -77,7 +81,7 @@ var ticking = false;
   }
 
   function onPan(ev) {
-    var upperLimit = Math.min(START_X + ev.deltaX, 460 - 300);
+    var upperLimit = Math.min(START_X + ev.deltaX, 480 - 300);
     var lowerLimit = 0;
     var newX = Math.max(0, upperLimit);
 
@@ -108,6 +112,34 @@ var ticking = false;
     $img.attr("src", this.result);
     side = Math.min($img.width(), $img.height());
     $(el).width(side).height(side);
+  }
+
+  function crop(argument) {
+    var $ov = $("#overlay");
+    var $img = $("#img");
+
+    var image = document.getElementById('img');
+    var overlay = document.getElementById('overlay');
+    var canvas = document.getElementById('cropped');
+    var ctx = canvas.getContext('2d');
+
+    image_offset = image.getBoundingClientRect();
+    overlay_offset = overlay.getBoundingClientRect();
+
+    var offset_left = overlay_offset.left - image_offset.left;
+    var side = overlay_offset.width;
+
+    var sx = offset_left;
+    var sy = 0;
+    var sWidth = 300;
+    var sHeight = 300;
+
+    var dx = 0;
+    var dy = 0;
+    var dWidth = 300;
+    var dHeight = 300;
+
+    ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }
 
 });
