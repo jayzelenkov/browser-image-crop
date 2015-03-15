@@ -12,8 +12,11 @@
         opacity: 0.5;
         background-color: #ccc;
       }
+      #cropped {
+        display: none;
+      }
     </style>
-    <!-- <meta name="viewport" content="width=device-width,maximum-scale=1,minimum-scale=1,user-scalable=no,initial-scale=1"> -->
+    <meta name="viewport" content="width=device-width,maximum-scale=1,minimum-scale=1,user-scalable=no,initial-scale=1">
   </head>
   <body>
     <form id="upload" action="destination.html">
@@ -60,6 +63,7 @@ var ticking = false;
 
   $("#uploadBtn").click(function (e) {
     e.preventDefault();
+    $("#cropped").hide();
     var input = document.getElementById("inputFile");
     var file = input.files[0];
 
@@ -74,6 +78,7 @@ var ticking = false;
   mc.on("pan", onPan);
   mc.on("panend", function () {
     START_X = overlay.getBoundingClientRect().left;
+    START_Y = overlay.getBoundingClientRect().top;
   });
 
   function requestElementUpdate() {
@@ -84,13 +89,16 @@ var ticking = false;
   }
 
   function onPan(ev) {
-    var maxOffset = image.getBoundingClientRect().width - overlay.getBoundingClientRect().width;
-    var upperLimit = Math.min(START_X + ev.deltaX, maxOffset);
-    var newX = Math.max(0, upperLimit);
+    var maxOffset_x = image.getBoundingClientRect().width - overlay.getBoundingClientRect().width;
+    var maxOffset_y = image.getBoundingClientRect().height - overlay.getBoundingClientRect().height;
+    var upperLimit_x = Math.min(START_X + ev.deltaX, maxOffset_x);
+    var upperLimit_y = Math.min(START_Y + ev.deltaY, maxOffset_y);
+    var newX = Math.max(0, upperLimit_x);
+    var newY = Math.max(0, upperLimit_y);
 
     transform.translate = {
         x: newX,
-        y: 0
+        y: newY
     };
     requestElementUpdate();
   }
@@ -116,14 +124,30 @@ var ticking = false;
     document.body.appendChild(orig_img);
 
     setTimeout(function () {
+      var landscape = orig_img.naturalWidth > orig_img.naturalHeight;
       var scale_ratio = Math.max(orig_img.naturalWidth, orig_img.naturalHeight) / 480;
-      var overlay_side = Math.round(Math.min(orig_img.naturalWidth, orig_img.naturalHeight) / scale_ratio);
       var downscaled = downScaleImage(orig_img, 1 / scale_ratio);
-
       image.src = downscaled.toDataURL();
-      $(overlay).width(overlay_side).height(overlay_side);
+
+      var overlay_side;
+      if (landscape) {
+        overlay_side = Math.min(orig_img.naturalWidth, orig_img.naturalHeight);
+      } else {
+        overlay_side = Math.max(orig_img.naturalWidth, orig_img.naturalHeight);
+      }
+
+      overlay_side = Math.round(overlay_side / scale_ratio);
+      $(overlay)
+        .width(overlay_side)
+        .height(overlay_side)
+        .css({
+          "webkitTransform": "translate3d(0px, 0px, 0)",
+          "mozTransform": "translate3d(0px, 0px, 0)",
+          "transform": "translate3d(0px, 0px, 0)"
+        });
+
       orig_img.remove();
-    }, 0);
+    }, 200);
   }
 
   function crop(argument) {
@@ -139,15 +163,17 @@ var ticking = false;
     ctx.msImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
 
+    $(canvas).show();
     image_offset = image.getBoundingClientRect();
     overlay_offset = overlay.getBoundingClientRect();
 
     var scale_ratio = Math.min(image.naturalWidth, image.naturalHeight) / overlay_offset.width;
     var offset_left = Math.round((overlay_offset.left - image_offset.left) * scale_ratio);
+    var offset_top = Math.round((overlay_offset.top - image_offset.top) * scale_ratio);
     var side = Math.round(overlay_offset.width * scale_ratio);
 
     var sx = offset_left;
-    var sy = 0;
+    var sy = offset_top;
     var sWidth = side;
     var sHeight = side;
 
