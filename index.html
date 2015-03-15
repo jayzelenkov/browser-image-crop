@@ -13,7 +13,7 @@
         background-color: #ccc;
       }
     </style>
-    <meta name="viewport" content="width=device-width,maximum-scale=1,minimum-scale=1,user-scalable=no,initial-scale=1">
+    <!-- <meta name="viewport" content="width=device-width,maximum-scale=1,minimum-scale=1,user-scalable=no,initial-scale=1"> -->
   </head>
   <body>
     <form id="upload" action="destination.html">
@@ -23,18 +23,21 @@
     </form>
 
     <div id="preview">
-      <img id="img" width="480" height="300"/>
+      <img id="img" width="480"/>
       <div id="overlay"></div>
     </div>
-    <canvas id="cropped" width="300" height="300"></canvas>
+    <canvas id="cropped" width="360" height="360"></canvas>
 
     <script src="node_modules/jquery/dist/jquery.js"></script>
     <script src="node_modules/hammerjs/hammer.js"></script>
+    <script src="canvas_scale.js"></script>
     <script charset="utf-8">
 $(function() {
 
 var screen = document.querySelector("#preview");
-var el = document.querySelector("#overlay");
+var image = document.querySelector("#img");
+var overlay = document.querySelector("#overlay");
+var cropped = document.querySelector("#cropped");
 
 var START_X = 0;
 var START_Y = 0;
@@ -67,10 +70,10 @@ var ticking = false;
 
   $("#crop").click(crop);
 
-  var mc = new Hammer(el);
+  var mc = new Hammer(overlay);
   mc.on("pan", onPan);
   mc.on("panend", function () {
-    START_X = $(el).offset().left;
+    START_X = overlay.getBoundingClientRect().left;
   });
 
   function requestElementUpdate() {
@@ -81,8 +84,8 @@ var ticking = false;
   }
 
   function onPan(ev) {
-    var upperLimit = Math.min(START_X + ev.deltaX, 480 - 300);
-    var lowerLimit = 0;
+    var maxOffset = image.getBoundingClientRect().width - overlay.getBoundingClientRect().width;
+    var upperLimit = Math.min(START_X + ev.deltaX, maxOffset);
     var newX = Math.max(0, upperLimit);
 
     transform.translate = {
@@ -100,18 +103,27 @@ var ticking = false;
       ];
 
       value = value.join(" ");
-      el.style.webkitTransform = value;
-      el.style.mozTransform = value;
-      el.style.transform = value;
+      overlay.style.webkitTransform = value;
+      overlay.style.mozTransform = value;
+      overlay.style.transform = value;
       ticking = false;
   }
 
   function renderImage() {
-    var $img = $("#img");
-    var side;
-    $img.attr("src", this.result);
-    side = Math.min($img.width(), $img.height());
-    $(el).width(side).height(side);
+    var orig_img = new Image();
+    orig_img.setAttribute("style", "display:none;");
+    orig_img.src = this.result;
+    document.body.appendChild(orig_img);
+
+    setTimeout(function () {
+      var scale_ratio = Math.max(orig_img.naturalWidth, orig_img.naturalHeight) / 480;
+      var overlay_side = Math.round(Math.min(orig_img.naturalWidth, orig_img.naturalHeight) / scale_ratio);
+      var downscaled = downScaleImage(orig_img, 1 / scale_ratio);
+
+      image.src = downscaled.toDataURL();
+      $(overlay).width(overlay_side).height(overlay_side);
+      orig_img.remove();
+    }, 0);
   }
 
   function crop(argument) {
@@ -122,22 +134,27 @@ var ticking = false;
     var overlay = document.getElementById('overlay');
     var canvas = document.getElementById('cropped');
     var ctx = canvas.getContext('2d');
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.msImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
 
     image_offset = image.getBoundingClientRect();
     overlay_offset = overlay.getBoundingClientRect();
 
-    var offset_left = overlay_offset.left - image_offset.left;
-    var side = overlay_offset.width;
+    var scale_ratio = Math.min(image.naturalWidth, image.naturalHeight) / overlay_offset.width;
+    var offset_left = Math.round((overlay_offset.left - image_offset.left) * scale_ratio);
+    var side = Math.round(overlay_offset.width * scale_ratio);
 
     var sx = offset_left;
     var sy = 0;
-    var sWidth = 300;
-    var sHeight = 300;
+    var sWidth = side;
+    var sHeight = side;
 
     var dx = 0;
     var dy = 0;
-    var dWidth = 300;
-    var dHeight = 300;
+    var dWidth = 360;
+    var dHeight = 360;
 
     ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }
