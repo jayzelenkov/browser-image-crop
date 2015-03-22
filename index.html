@@ -1,26 +1,12 @@
 <html>
   <head>
-    <title>jq touch events</title>
-    <style media="screen">
-      #preview {
-        position: relative;
-      }
-      #overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        opacity: 0.5;
-        background-color: #ccc;
-      }
-      #cropped {
-        display: none;
-      }
-    </style>
+    <title>Browser Image Crop Experiment</title>
+    <link rel="stylesheet" href="css/app.css"/>
     <meta name="viewport" content="width=device-width,maximum-scale=1,minimum-scale=1,user-scalable=no,initial-scale=1">
   </head>
   <body>
-    <form id="upload" action="destination.html">
-      <input type="file" id="inputFile" name="inputFile" />
+    <form id="upload">
+      <input type="file" id="inputFile" name="inputFile">
       <input type="button" id="uploadBtn" value="Submit!">
       <input type="button" id="crop" value="Crop It!">
     </form>
@@ -29,163 +15,8 @@
       <img id="img" width="480"/>
       <div id="overlay"></div>
     </div>
-    <canvas id="cropped" width="360" height="360"></canvas>
+    <canvas id="cropped" class="hidden" width="360" height="360"></canvas>
 
-    <script src="node_modules/jquery/dist/jquery.js"></script>
-    <script src="node_modules/hammerjs/hammer.js"></script>
-    <script src="canvas_scale.js"></script>
-    <script charset="utf-8">
-$(function() {
-
-var screen = document.querySelector("#preview");
-var image = document.querySelector("#img");
-var overlay = document.querySelector("#overlay");
-var cropped = document.querySelector("#cropped");
-
-var START_X = 0;
-var START_Y = 0;
-
-var transform = {
-    translate: { x: START_X, y: START_Y },
-    scale: 1,
-    angle: 0,
-    rx: 0,
-    ry: 0,
-    rz: 0
-};
-var reqAnimationFrame = (function () {
-  return window[Hammer.prefixed(window, 'requestAnimationFrame')] || function (callback) {
-    window.setTimeout(callback, 1000 / 60);
-  };
-})();
-
-var ticking = false;
-
-  $("#uploadBtn").click(function (e) {
-    e.preventDefault();
-    $("#cropped").hide();
-    var input = document.getElementById("inputFile");
-    var file = input.files[0];
-
-    fr = new FileReader();
-    fr.onload = renderImage;
-    fr.readAsDataURL(file);
-  });
-
-  $("#crop").click(crop);
-
-  var mc = new Hammer(overlay);
-  mc.on("pan", onPan);
-  mc.on("panend", function () {
-    START_X = overlay.getBoundingClientRect().left;
-    START_Y = overlay.getBoundingClientRect().top;
-  });
-
-  function requestElementUpdate() {
-        if(!ticking) {
-            reqAnimationFrame(updateElementTransform);
-            ticking = true;
-        }
-  }
-
-  function onPan(ev) {
-    var maxOffset_x = image.getBoundingClientRect().width - overlay.getBoundingClientRect().width;
-    var maxOffset_y = image.getBoundingClientRect().height - overlay.getBoundingClientRect().height;
-    var upperLimit_x = Math.min(START_X + ev.deltaX, maxOffset_x);
-    var upperLimit_y = Math.min(START_Y + ev.deltaY, maxOffset_y);
-    var newX = Math.max(0, upperLimit_x);
-    var newY = Math.max(0, upperLimit_y);
-
-    transform.translate = {
-        x: newX,
-        y: newY
-    };
-    requestElementUpdate();
-  }
-
-  function updateElementTransform() {
-      var value = [
-          'translate3d(' + transform.translate.x + 'px, ' + transform.translate.y + 'px, 0)'
-          // 'scale(' + transform.scale + ', ' + transform.scale + ')',
-          // 'rotate3d('+ transform.rx +','+ transform.ry +','+ transform.rz +','+  transform.angle + 'deg)'
-      ];
-
-      value = value.join(" ");
-      overlay.style.webkitTransform = value;
-      overlay.style.mozTransform = value;
-      overlay.style.transform = value;
-      ticking = false;
-  }
-
-  function renderImage() {
-    var orig_img = new Image();
-    orig_img.setAttribute("style", "display:none;");
-    orig_img.src = this.result;
-    document.body.appendChild(orig_img);
-
-    setTimeout(function () {
-      var landscape = orig_img.naturalWidth > orig_img.naturalHeight;
-      var scale_ratio = Math.max(orig_img.naturalWidth, orig_img.naturalHeight) / 480;
-      var downscaled = downScaleImage(orig_img, 1 / scale_ratio);
-      image.src = downscaled.toDataURL();
-
-      var overlay_side;
-      if (landscape) {
-        overlay_side = Math.min(orig_img.naturalWidth, orig_img.naturalHeight);
-      } else {
-        overlay_side = Math.max(orig_img.naturalWidth, orig_img.naturalHeight);
-      }
-
-      overlay_side = Math.round(overlay_side / scale_ratio);
-      $(overlay)
-        .width(overlay_side)
-        .height(overlay_side)
-        .css({
-          "webkitTransform": "translate3d(0px, 0px, 0)",
-          "mozTransform": "translate3d(0px, 0px, 0)",
-          "transform": "translate3d(0px, 0px, 0)"
-        });
-
-      orig_img.remove();
-    }, 200);
-  }
-
-  function crop(argument) {
-    var $ov = $("#overlay");
-    var $img = $("#img");
-
-    var image = document.getElementById('img');
-    var overlay = document.getElementById('overlay');
-    var canvas = document.getElementById('cropped');
-    var ctx = canvas.getContext('2d');
-    ctx.mozImageSmoothingEnabled = false;
-    ctx.webkitImageSmoothingEnabled = false;
-    ctx.msImageSmoothingEnabled = false;
-    ctx.imageSmoothingEnabled = false;
-
-    $(canvas).show();
-    image_offset = image.getBoundingClientRect();
-    overlay_offset = overlay.getBoundingClientRect();
-
-    var scale_ratio = Math.min(image.naturalWidth, image.naturalHeight) / overlay_offset.width;
-    var offset_left = Math.round((overlay_offset.left - image_offset.left) * scale_ratio);
-    var offset_top = Math.round((overlay_offset.top - image_offset.top) * scale_ratio);
-    var side = Math.round(overlay_offset.width * scale_ratio);
-
-    var sx = offset_left;
-    var sy = offset_top;
-    var sWidth = side;
-    var sHeight = side;
-
-    var dx = 0;
-    var dy = 0;
-    var dWidth = 360;
-    var dHeight = 360;
-
-    ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-  }
-
-});
-    </script>
+    <script src="js/app.js"></script>
   </body>
 </html>

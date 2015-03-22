@@ -1,16 +1,33 @@
 {
   "name": "browser-image-crop",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Crop images directly in the browser without uploading them to the server",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Jev Zelenkov",
+  "author": {
+    "name": "Jev Zelenkov",
+    "url": "http://www.jzelenkov.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jzelenkov/browser-image-crop.git"
+  },
+  "keywords": [
+    "jquery",
+    "javascript",
+    "browser",
+    "library"
+  ],
   "license": "MIT",
   "devDependencies": {
+    "browserify": "^9.0.3",
+    "gulp": "^3.8.11",
+    "gulp-sass": "^1.3.3",
+    "gulp-sourcemaps": "^1.5.1",
+    "gulp-uglify": "^1.1.0",
     "hammerjs": "2.0.4",
     "jquery": "2.1.3",
-    "jquery-hammerjs": "2.0.0"
+    "vinyl-transform": "^1.0.0"
   }
 }

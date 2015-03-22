@@ -3,14 +3,14 @@
 
 // scales the image by (float) scale < 1
 // returns a canvas containing the scaled image.
-function downScaleImage(img, scale) {
+module.exports = function downscale(img, scale) {
     var imgCV = document.createElement('canvas');
     imgCV.width = img.width;
     imgCV.height = img.height;
     var imgCtx = imgCV.getContext('2d');
     imgCtx.drawImage(img, 0, 0);
     return downScaleCanvas(imgCV, scale);
-}
+};
 
 // scales the canvas by (float) scale < 1
 // returns a new canvas containing the scaled image.
@@ -79,7 +79,7 @@ function downScaleCanvas(cv, scale) {
                 tBuffer[tIndex + 1] += sG * w;
                 tBuffer[tIndex + 2] += sB * w;
                 // add weighted component for next (tX+1) px
-                nw = nwx * scale
+                nw = nwx * scale;
                 tBuffer[tIndex + 3] += sR * nw;
                 tBuffer[tIndex + 4] += sG * nw;
                 tBuffer[tIndex + 5] += sB * nw;
@@ -90,7 +90,7 @@ function downScaleCanvas(cv, scale) {
                 tBuffer[tIndex + 1] += sG * w;
                 tBuffer[tIndex + 2] += sB * w;
                 // add weighted component for next (tY+1) px
-                nw = nwy * scale
+                nw = nwy * scale;
                 tBuffer[tIndex + 3 * tw    ] += sR * nw;
                 tBuffer[tIndex + 3 * tw + 1] += sG * nw;
                 tBuffer[tIndex + 3 * tw + 2] += sB * nw;

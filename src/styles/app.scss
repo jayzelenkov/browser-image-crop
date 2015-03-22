@@ -1,0 +1,19 @@
+.hidden {
+  display: none;
+}
+
+#preview {
+  position: relative;
+}
+
+#overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.5;
+  background-color: #ccc;
+}
+
+.content {
+  position: relative;
+}
