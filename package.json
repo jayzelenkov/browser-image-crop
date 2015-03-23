@@ -21,13 +21,16 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "autoprefixer-core": "^5.1.7",
     "browserify": "^9.0.3",
     "gulp": "^3.8.11",
+    "gulp-postcss": "^4.0.3",
     "gulp-sass": "^1.3.3",
     "gulp-sourcemaps": "^1.5.1",
     "gulp-uglify": "^1.1.0",
     "hammerjs": "2.0.4",
     "jquery": "2.1.3",
+    "scut": "^1.1.2",
     "vinyl-transform": "^1.0.0"
   }
 }

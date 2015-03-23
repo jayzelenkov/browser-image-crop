@@ -1,11 +1,14 @@
+var autoprefixer = require('autoprefixer-core');
 var browserify = require("browserify");
 var gulp = require("gulp");
+var postcss = require('gulp-postcss');
 var sass = require("gulp-sass");
 var transform = require("vinyl-transform");
 
 
 gulp.task("styles", function () {
   gulp.src("./src/styles/*.scss")
+    .pipe(postcss([ autoprefixer({ browsers: ["last 2 version"] }) ]))
     .pipe(sass())
     .pipe(gulp.dest("./css/"));
 });

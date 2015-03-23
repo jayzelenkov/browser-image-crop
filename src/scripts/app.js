@@ -26,7 +26,7 @@ window.onload = function () {
   mc.on("panend", updateOverlayValues);
 };
 
-function requestElementUpdate() {
+function requestElementUpdate () {
   if(!ticking) {
     reqAnimationFrame(updateVals);
     ticking = true;
@@ -76,6 +76,7 @@ function crop(argument) {
   var dHeight = 360;
 
   cropped.getContext('2d').drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+  cropped.parentNode.classList.remove("sm-hide");
 }
 
 function repositionOverlay (evt) {
@@ -101,7 +102,7 @@ function updateOverlayValues () {
   volatile_y = overlay.getBoundingClientRect().top - offset_y;
 }
 
-function renderImage() {
+function renderImage () {
   var orig_img = new Image();
   orig_img.classList.add("hidden");
   orig_img.src = this.result;
@@ -134,6 +135,7 @@ function renderImage() {
       });
 
     orig_img.remove();
+    cropped.parentNode.classList.add("sm-hide");
   };
 
   document.body.appendChild(orig_img);

@@ -1,5 +1,59 @@
+$cropper-main-color: #f5f5f5;
+$cropper-border-color: #d8d8d8;
+
+@import "../../node_modules/scut/dist/scut";
+
+@mixin boxy {
+  background-color: $cropper-main-color;
+  border: 1px solid $cropper-border-color;
+  margin: 5px;
+}
+
+.cropper {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-content: flex-start;
+  align-items: flex-start;
+
+  &__controls {
+    @include boxy;
+    position: relative;
+    height: 30px;
+    flex-grow: 1;
+    flex-shrink: 0;
+    flex-basis: calc(100% - 12px);
+  }
+
+  &__workspace {
+    @include boxy;
+    position: relative;
+    width: 500px;
+    height: 680px;
+    flex-grow: 1;
+    flex-shrink: 0;
+    flex-basis: 500px;
+  }
+
+  &__result {
+    @include boxy;
+    position: relative;
+    width: 400px;
+    height: 680px;
+  }
+}
+
 .hidden {
   display: none;
+}
+
+#upload {
+  @include scut-center-transform;
+}
+
+.workspace_area {
+  @include scut-center-transform;
 }
 
 #preview {
@@ -14,6 +68,51 @@
   background-color: #ccc;
 }
 
+#cropped {
+  max-width: 360px;
+  @include scut-center-transform;
+}
+
 .content {
   position: relative;
+}
+
+@media only screen and (max-width: 920px) {
+  .cropper {
+    &__controls {
+      width: 100%;
+      height: 60px;
+    }
+
+    &__workspace {
+      width: 100%;
+    }
+
+    &__result {
+      width: 100%;
+    }
+
+    &__result.sm-hide {
+      display: none;
+    }
+  }
+
+  #preview .overlay {
+    width: 90%;
+  }
+
+  #preview .img {
+    width: 90%;
+  }
+
+  #cropped {
+    width: 90%;
+  }
+
+}
+
+@media only screen and (max-width: 512px) {
+  .cropper__controls {
+    flex-basis: 500px;
+  }
 }

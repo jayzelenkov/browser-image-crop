@@ -5,17 +5,28 @@
     <meta name="viewport" content="width=device-width,maximum-scale=1,minimum-scale=1,user-scalable=no,initial-scale=1">
   </head>
   <body>
-    <form id="upload">
-      <input type="file" id="inputFile" name="inputFile">
-      <input type="button" id="uploadBtn" value="Submit!">
-      <input type="button" id="crop" value="Crop It!">
-    </form>
 
-    <div id="preview">
-      <img id="img" width="480"/>
-      <div id="overlay"></div>
+    <div class="cropper">
+      <div class="cropper__controls">
+        <form id="upload">
+          <input type="file" id="inputFile" name="inputFile">
+          <input type="button" id="uploadBtn" value="Submit!">
+          <input type="button" id="crop" value="Crop It!">
+        </form>
+      </div>
+      <div class="cropper__workspace">
+        <div class="workspace_area">
+          <div id="preview">
+            <img id="img" width="480"/>
+            <div id="overlay"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cropper__result sm-hide">
+        <canvas id="cropped" class="hidden" width="360" height="360"></canvas>
+      </div>
     </div>
-    <canvas id="cropped" class="hidden" width="360" height="360"></canvas>
 
     <script src="js/app.js"></script>
   </body>
